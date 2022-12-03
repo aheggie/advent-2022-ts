@@ -8,7 +8,7 @@ const elfStrings = rawData.split("\n\n")
 
 //sum each elf
 const processEachElf = elfString => {
-    return elfString.split("\n")
+    return elfString.split("\n").map(numberString => parseInt(numberString))
     
 }
 
