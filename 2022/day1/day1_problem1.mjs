@@ -4,13 +4,14 @@ import { readFileSync } from "node:fs";
 const rawData = readFileSync("./alexandra/input.txt", "utf8");
 
 //split into separate lists for each elf
-const elfStrings = rawData.split("\n\n");
+const elfStrings = rawData.trim().split("\n\n");
 
 const badElf = elfStrings[253];
 
 //sum each elf
 const processEachElf = (elfString) =>
   elfString
+    .trim()
     // split into list of numberStings
     .split("\n")
     // convert from STING to number
@@ -31,7 +32,7 @@ const elfSums = elfStrings.map(processEachElf);
 //find max elf
 const elvesDescending = elfSums.slice(0).sort((sumA, sumB) => sumB - sumA);
 
-const elfMax = elvesDescending[0];
+const elfMax = elfSums.reduce((acc, cur) => (acc >= cur ? acc : cur));
 
 const elfMaxLocation = elfSums.indexOf(elfMax);
 
@@ -46,18 +47,18 @@ const elfMinLocation = elfSums.indexOf(elfMin);
 
 //print out result
 const output = {
-  elvesLength: elfStrings.length,
-  badElf,
-  badElfList,
-  badElfNumList,
-  badElfSum,
-  indexOfNaN,
+  //   elvesLength: elfStrings.length,
+  //   badElf,
+  //   badElfList,
+  //   badElfNumList,
+  //   badElfSum,
+  //   indexOfNaN,
   elfMax,
   elfMaxLocation,
   elfMin,
   elfMinLocation,
   topThreeSum,
-  isThereNaN,
+  //   isThereNaN,
 };
 console.log(output);
 
