@@ -16,11 +16,15 @@ const processEachElf = (elfString) =>
     // sum each elf to a single integer
     .reduce((accumulator, currentValue) => accumulator + currentValue, 0);
 
-const elves = elfStrings.map(processEachElf);
+const elfSums = elfStrings.map(processEachElf);
 
 //find max elf
+const elfMax = elfSums.slice(0).sort((sumA, sumB) => sumB - sumA)[0];
+
+const elfLocation = elfSums.indexOf(elfMax);
+
+// find min elf
 
 //print out result
-// console.log(rawData, JSON.stringify(rawData))
-const output = elves;
+const output = { elfMax, elfLocation };
 console.log(output);
