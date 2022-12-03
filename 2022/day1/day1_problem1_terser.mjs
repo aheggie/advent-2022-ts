@@ -17,7 +17,7 @@ const elvesDescending =
         // convert from STING to number
         .map((numberString) => parseInt(numberString))
         // sum each elf to a single integer
-        .reduce((accumulator, currentValue) => accumulator + currentValue, 0)
+        .reduce((accumulator, currentValue) => accumulator + currentValue)
     )
     // to make sort immutable
     .slice(0)
