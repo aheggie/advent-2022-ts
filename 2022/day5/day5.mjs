@@ -51,7 +51,10 @@ const cleanedInstructionData = rawInstructionData
   });
 
 const movedStacksQ1 = cleanedInstructionData.reduce(
-  (acc, { amountMoved, fromStack, toStack }) => {
+  (acc, { amountMoved, fromStack, toStack }, currentIndex) => {
+    if (currentIndex === 0) {
+      console.log("Q1", acc);
+    }
     const transfer = acc[fromStack].slice(0, amountMoved);
     const newFromStack = acc[fromStack].slice(amountMoved);
     const newToStack = transfer.reverse().concat(acc[toStack]);
@@ -60,31 +63,37 @@ const movedStacksQ1 = cleanedInstructionData.reduce(
     acc[toStack] = newToStack;
     return acc;
   },
-  arrOfStacks
+  //   so we never alter the original data in place
+  arrOfStacks.slice(0)
 );
 
 const processedDataQ1 = movedStacksQ1.map((stack) => stack[0]).join("");
 
 const movedStacksQ2 = cleanedInstructionData.reduce(
-  (acc, { amountMoved, fromStack, toStack }) => {
+  (acc, { amountMoved, fromStack, toStack }, currentIndex) => {
+    if (currentIndex === 0) {
+      console.log("Q2", acc);
+    }
     const transfer = acc[fromStack].slice(0, amountMoved);
     const newFromStack = acc[fromStack].slice(amountMoved);
-    const newToStack = transfer.reverse().concat(acc[toStack]);
-    // uncertain of this
+    // just dont reverse it to answer Q2 - IMMUTABLE METHODS!!!
+    const newToStack = transfer.concat(acc[toStack]);
     acc[fromStack] = newFromStack;
     acc[toStack] = newToStack;
     return acc;
   },
-  arrOfStacks
+  //   so we never alter the original data in place
+  arrOfStacks.slice(0)
 );
 
-const processedDataQ2 = movedStacksQ1.map((stack) => stack[0]).join("");
+const processedDataQ2 = movedStacksQ2.map((stack) => stack[0]).join("");
 
 console.dir(
   {
     arrOfStacks,
-    cleanedInstructionData,
+    // cleanedInstructionData
     processedDataQ1,
+    processedDataQ2,
   },
   { showHidden: true, depth: null, maxArrayLength: null }
 );
