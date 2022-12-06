@@ -12,11 +12,6 @@ const rawData = readFileSync(`./data/${arg}.txt`, "utf8")
   //   defensive see full trim above
   .map((str) => str.trim());
 
-const minOfTwoElves = (elfOneMin, elfTwoMin) =>
-  elfOneMin < elfTwoMin ? "elfOne" : "elfTwo";
-const maxOfTwoElves = (elfOneMax, elfTwoMax) =>
-  elfOneMax > elfTwoMax ? "elfOne" : "elfTwo";
-
 const cleanedData = rawData.map((fullStr) =>
   fullStr
     .split(",")
@@ -25,9 +20,35 @@ const cleanedData = rawData.map((fullStr) =>
     )
 );
 
+const processDataQ1 = cleanedData
+  .map(([elfOne, elfTwo]) => ({
+    elfOneEncompassing: elfOne[0] <= elfTwo[0] && elfOne[1] >= elfTwo[1],
+    elfTwoEncompassing: elfTwo[0] <= elfOne[0] && elfTwo[1] >= elfOne[1],
+    elfOne,
+    elfTwo,
+  }))
+  .filter(
+    ({ elfOneEncompassing, elfTwoEncompassing }) =>
+      elfOneEncompassing || elfTwoEncompassing
+  );
+
+const processDataQ2 = cleanedData
+  .map(([elfOne, elfTwo]) => ({
+    elfOneStrictlySmaller: elfOne[1] < elfTwo[0],
+    elfTwoStrictlySmaller: elfTwo[1] < elfOne[0],
+    elfOne,
+    elfTwo,
+  }))
+  .filter(
+    ({ elfOneStrictlySmaller, elfTwoStrictlySmaller }) =>
+      !(elfOneStrictlySmaller || elfTwoStrictlySmaller)
+  );
+
 console.dir(
   {
     cleanedData,
+    processDataQ1,
+    processDataQ2,
   },
-  { showHidden: true, depth: null, maxArraySize: null }
+  { showHidden: true, depth: null, maxArrayLength: null }
 );
