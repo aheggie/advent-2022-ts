@@ -20,7 +20,7 @@ const finalScore = readFileSync("./data/input.txt", "utf8")
   // split into rounds
   .split("\n")
   // split the round into an array of two string choices
-  .map((roundStr) => roundStr.split(" "))
+  .map((roundStr) => roundStr.trim().split(" "))
   // process each array of two strings into an object with each choice
   .map((roundArr) => ({
     opp: opponentChoiceLookup[roundArr[0]],
@@ -32,7 +32,7 @@ const finalScore = readFileSync("./data/input.txt", "utf8")
       case "Rock":
         return { choice: oppRockObj[goal], goal: goal };
       case "Paper":
-        return { choice: oppScissorsObj[goal], goal: goal };
+        return { choice: oppPaperObj[goal], goal: goal };
       case "Scissors":
         return { choice: oppScissorsObj[goal], goal: goal };
     }
