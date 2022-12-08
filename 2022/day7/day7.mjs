@@ -21,7 +21,15 @@ const isNumeric = (str) => {
 const parsedData = rawData.map((lineStr, idx) => {
   const lineArr = lineStr.trim().split(" ");
   if (lineArr[0] === "$") {
-    return { type: "instruction" };
+    if (lineArr[1] === "cd") {
+      return { type: "instruction", action: "cd", to: lineArr[2] };
+    } else if (lineArr[1] === "ls") {
+      return { type: "instruction", action: "ls" };
+    } else {
+      throw new Error(
+        `unknown instruction action and idx: ${idx}: " ${lineStr} "`
+      );
+    }
   } else if (lineArr[0] === "dir") {
     return { type: "directory", name: lineArr[1], size: undefined };
   } else if (isNumeric(lineStr[0])) {
