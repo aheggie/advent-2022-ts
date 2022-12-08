@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { readFileSync, writeFileSync } from "node:fs";
 
 const arg = process.argv[2];
 
@@ -121,15 +121,17 @@ const rawListOfFiles = parsedData.filter(({ type }) => type === "file");
 // confident from commented checking above that directories are unique - so this should work without bugs
 // otherwise it might only index the last instance of a repeated directory
 
-const directoriesObj = rawListOfDirectories
-  .concat({
+const directoriesObj = [
+  {
     type: "directory",
     name: "/",
     currentPath: "root",
     size: 0,
     sizeOfDirectChildFiles: 0,
     childDirectories: [],
-  })
+  },
+]
+  .concat(rawListOfDirectories)
   .reduce((acc, dir) => {
     acc[dir.name] = dir;
     return acc;
@@ -154,13 +156,46 @@ const dirsWithFilesAndChildren = rawListOfDirectories.reduce(
   { ...dirsWithFiles }
 );
 
-// let workingDirs =
+let workingDirs = { ...dirsWithFilesAndChildren };
 
-// while ()
+const withFileSizes = rawListOfFiles.forEach(({ currentPath, size }) => {
+  workingDirs["/"].size += size;
+  // hmmm a reducer shouldnt have a side effect
+  currentPath
+    .split("/")
+    .slice(1, -1)
+    .reduce((acc, individualDir) => {
+      const current = `${acc}${individualDir}/`;
+      workingDirs[current].size += size;
+      return current;
+    }, "/");
+});
+
+const sizes = Object.keys(workingDirs).map((key) => workingDirs[key].size);
+const processedDataQ1 = sizes
+  .filter((size) => size < 100000)
+  .reduce((acc, cur) => acc + cur);
+
+writeFileSync("./data/output.json", JSON.stringify(workingDirs));
+
+const allSpaceUsed = workingDirs["/"].size;
+
+const totalDiskSpace = 70000000;
+const installSize = 30000000;
+const spaceRemaining = totalDiskSpace - allSpaceUsed;
+const spaceNeeded = installSize - spaceRemaining;
+
+const processedDataQ2 = sizes
+  .filter((size) => size > spaceNeeded)
+  .sort((a, b) => a - b)[0];
 
 console.dir(
   {
-    dirsWithFilesAndChildren,
+    processedDataQ1,
+    allSpaceUsed,
+    spaceNeeded,
+    spaceRemaining,
+    processedDataQ2,
     // test: moveUp("/a/a/a/a/"),
   },
   {
