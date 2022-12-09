@@ -161,6 +161,7 @@ let workingDirs = { ...dirsWithFilesAndChildren };
 const withFileSizes = rawListOfFiles.forEach(({ currentPath, size }) => {
   workingDirs["/"].size += size;
   // hmmm a reducer shouldnt have a side effect
+  //   reduce to an object with array and string children then forEach across the array
   currentPath
     .split("/")
     .slice(1, -1)
