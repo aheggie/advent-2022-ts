@@ -1,12 +1,12 @@
-import { readFileSync } from "node:fs";
+import { Dir, readFileSync } from "fs";
 
-const arg = process.argv[2];
+const arg: string = process.argv[2];
 
 if (arg !== "test" && arg !== "input") {
   throw new Error("argument must be 'test' or 'input'");
 }
 
-const rawData = readFileSync(`./data/${arg}.txt`, "utf8")
+const rawData: string[] = readFileSync(`./data/${arg}.txt`, "utf8")
   .trim()
   // this is because the test data, which is copy-pasted from the problem, saves with a different newline convention
   // than the generated problem data
@@ -15,19 +15,40 @@ const rawData = readFileSync(`./data/${arg}.txt`, "utf8")
 // this is from stackoverflow to check numeric with certainty
 // well use this to identify file statements in the data
 // as the string of a file statement starts with a numeric integer
-const isNumeric = (str) => {
-  if (typeof str != "string") return false; // we only process strings!
+const isNumeric = (str: string): boolean => {
+  // if (typeof str != "string") return false; // we only process strings!
   return (
-    !isNaN(str) && // use type coercion to parse the _entirety_ of the string (`parseFloat` alone does not do this)...
+    // !isNaN(str) && //use type coercion to parse the _entirety_ of the string (`parseFloat` alone does not do this)...
     !isNaN(parseFloat(str))
   ); // ...and ensure strings of whitespace fail
 };
 
 // performs the `cd ..` operation on a path string
 // so moveUp("/a/b/") will return "/a/" and so forth
-const moveUp = (path) => `${path.split("/").slice(0, -2).join("/")}/`;
+const moveUp = (path: string): string =>
+  `${path.split("/").slice(0, -2).join("/")}/`;
 
-const { parsedDataArr } = rawData.reduce(
+interface Directory {
+  type: "directory";
+  name: string;
+  currentPath: string;
+  size: number;
+}
+
+interface File {
+  type: "file";
+  name: string;
+  currentPath: string;
+  size: number;
+}
+
+interface DirectoriesDict {
+  [key: string]: Directory;
+}
+
+type ProblemData = Directory | File;
+
+const { parsedDataArr }: { parsedDataArr: ProblemData[] } = rawData.reduce(
   // idx is just taken to defensively identify the lines causing parsing errors
   // in the given data we find no parsing errors
   ({ currentPath, parsedDataArr }, lineStr, idx) => {
@@ -89,28 +110,37 @@ const { parsedDataArr } = rawData.reduce(
     }
   },
   // currentPath is working memory inside the reducer, parsedDataArr is the processed data we will keep
-  { currentPath: "/", parsedDataArr: [] }
+  { currentPath: "/", parsedDataArr: [] } as {
+    currentPath: string;
+    parsedDataArr: ProblemData[];
+  }
 );
 
-const directoriesArr = parsedDataArr.filter(({ type }) => type === "directory");
+const directoriesArr: Directory[] = parsedDataArr.filter(
+  (item): item is Directory => item.type === "directory"
+);
 
-const filesArr = parsedDataArr.filter(({ type }) => type === "file");
+const filesArr: File[] = parsedDataArr.filter(
+  (item): item is File => item.type === "file"
+);
 
 // uniqueness testing - proving the files and the directories are unique, otherwise the reducers later on will
 // process a repeated entry [repeat] times, introducing potentially obscure bugs
 
 // a Set of objects won't examine them deeply enough to prove uniqueness so we extract name to do a set of simple string
 // name is the unique full path of the directory
-const directoryNames = directoriesArr.map(({ name }) => name);
-const uniqueDirectoryNames = new Set(directoryNames);
+const directoryNames: string[] = directoriesArr.map(
+  ({ name }: Directory): string => name
+);
+const uniqueDirectoryNames: Set<string> = new Set(directoryNames);
 
 if (directoriesArr.length !== uniqueDirectoryNames.size) {
   throw new Error("There are repeats of directories in the list");
 }
 
 // name is the unique full path of the file
-const fileNames = filesArr.map(({ name }) => name);
-const uniqueFileNames = new Set(fileNames);
+const fileNames: string[] = filesArr.map(({ name }: File): string => name);
+const uniqueFileNames: Set<string> = new Set(fileNames);
 
 if (fileNames.length !== uniqueFileNames.size) {
   throw new Error("there are repeats of files in the list");
@@ -118,7 +148,7 @@ if (fileNames.length !== uniqueFileNames.size) {
 
 //confident that the directories are unique in their array, we reduce that array of x items into an object with x children
 // each child is ONE directory, keyed on its unique full path
-const directoriesDict = [
+const directoriesDict: DirectoriesDict = [
   // this is concatted on here because root is never listed as a directory in the instruction set
   // and so is not filtered into the list of directories above
   {
@@ -126,13 +156,13 @@ const directoriesDict = [
     name: "/",
     currentPath: "root",
     size: 0,
-  },
+  } as Directory,
 ]
   .concat(directoriesArr)
   .reduce((acc, dir) => {
     acc[dir.name] = dir;
     return acc;
-  }, {});
+  }, {} as DirectoriesDict);
 
 // we go through the list of files, which we have tested for uniqueness and
 // add their size to EVERY directory above them in the tree
@@ -140,8 +170,11 @@ const directoriesDict = [
 // order is O(rawListOFFiles.length * max_number_of_directories_in_a_path)
 // so O(n**2) really but in practice short-ish because the depth of the directory tree is max
 // like 5 directories in the problem input
-const directoriesWithTotalSizes = filesArr.reduce(
-  (directoriesAcc, { currentPath, size }) => {
+const directoriesWithTotalSizes: DirectoriesDict = filesArr.reduce(
+  (
+    directoriesAcc: DirectoriesDict,
+    { currentPath, size }: File
+  ): DirectoriesDict => {
     // the goal here is to produce an array with each valid sub path above the file
     // i.e. ["/", "/topdir/", "/topdir/subdir/", ...] etc.
     const { pathsArr } = currentPath
@@ -167,22 +200,22 @@ const directoriesWithTotalSizes = filesArr.reduce(
 );
 
 // this then maps over ALL directory names to produce an array of the total size associated with that name
-const sizes = Object.keys(directoriesWithTotalSizes).map(
-  (key) => directoriesWithTotalSizes[key].size
+const sizes: number[] = Object.keys(directoriesWithTotalSizes).map(
+  (key: string): number => directoriesWithTotalSizes[key].size
 );
 
-const processedDataQ1 = sizes
+const processedDataQ1: number = sizes
   .filter((size) => size < 100000)
   .reduce((acc, cur) => acc + cur);
 
-const allSpaceUsed = directoriesWithTotalSizes["/"].size;
+const allSpaceUsed: number = directoriesWithTotalSizes["/"].size;
 
-const totalDiskSpace = 70000000;
-const installSize = 30000000;
-const spaceRemaining = totalDiskSpace - allSpaceUsed;
-const spaceNeeded = installSize - spaceRemaining;
+const totalDiskSpace: number = 70000000;
+const installSize: number = 30000000;
+const spaceRemaining: number = totalDiskSpace - allSpaceUsed;
+const spaceNeeded: number = installSize - spaceRemaining;
 
-const processedDataQ2 = sizes
+const processedDataQ2: number = sizes
   .filter((size) => size > spaceNeeded)
   .sort((a, b) => a - b)[0];
 
