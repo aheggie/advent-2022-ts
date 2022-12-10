@@ -1,0 +1,11 @@
+{
+  "name": "advent-ts-2022",
+  "version": "1.0.0",
+  "description": "Advent of Code 2022 in TypeScript!",
+  "main": "null",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Alexandra Heggie",
+  "license": "UNLICENSED"
+}
