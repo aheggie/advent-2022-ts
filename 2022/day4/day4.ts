@@ -6,47 +6,63 @@ if (arg !== "test" && arg !== "input") {
   throw new Error("argument must be 'test' or 'input'");
 }
 
-const rawData = readFileSync(`./data/${arg}.txt`, "utf8")
+const rawData: string[] = readFileSync(`./data/${arg}.txt`, "utf8")
   .trim()
   .split("\n")
   //   defensive see full trim above
   .map((str) => str.trim());
 
-const cleanedData = rawData.map((fullStr) =>
-  fullStr
-    .split(",")
-    .map((singleElfStr) =>
-      singleElfStr.split("-").map((numChar) => parseInt(numChar, 10))
-    )
-);
+interface Elf {
+  minAssignment: number;
+  maxAssignment: number;
+}
 
-const processDataQ1 = cleanedData
-  .map(([elfOne, elfTwo]) => ({
-    elfOneEncompassing: elfOne[0] <= elfTwo[0] && elfOne[1] >= elfTwo[1],
-    elfTwoEncompassing: elfTwo[0] <= elfOne[0] && elfTwo[1] >= elfOne[1],
-    elfOne,
-    elfTwo,
+interface ElfPair {
+  elfOne: Elf;
+  elfTwo: Elf;
+}
+
+const cleanedData: ElfPair[] = rawData.map((fullStr: string): ElfPair => {
+  const [elfOne, elfTwo]: Elf[] = fullStr
+    .split(",")
+    .map((singleElfStr: string): Elf => {
+      const [minAssignment, maxAssignment]: number[] = singleElfStr
+        .split("-")
+        .map((numChar) => parseInt(numChar, 10));
+      return { minAssignment, maxAssignment };
+    });
+
+  return { elfOne, elfTwo };
+});
+
+const processDataQ1: number = cleanedData
+  .map(({ elfOne, elfTwo }) => ({
+    elfOneEncompassing:
+      elfOne.minAssignment <= elfTwo.minAssignment &&
+      elfOne.maxAssignment >= elfTwo.maxAssignment,
+    elfTwoEncompassing:
+      elfTwo.minAssignment <= elfOne.minAssignment &&
+      elfTwo.maxAssignment >= elfOne.maxAssignment,
   }))
+  // if one or the other encompasses their partner
   .filter(
     ({ elfOneEncompassing, elfTwoEncompassing }) =>
       elfOneEncompassing || elfTwoEncompassing
-  );
+  ).length;
 
-const processDataQ2 = cleanedData
-  .map(([elfOne, elfTwo]) => ({
-    elfOneStrictlySmaller: elfOne[1] < elfTwo[0],
-    elfTwoStrictlySmaller: elfTwo[1] < elfOne[0],
-    elfOne,
-    elfTwo,
+const processDataQ2: number = cleanedData
+  .map(({ elfOne, elfTwo }) => ({
+    elfOneStrictlySmaller: elfOne.maxAssignment < elfTwo.minAssignment,
+    elfTwoStrictlySmaller: elfTwo.maxAssignment < elfOne.minAssignment,
   }))
+  // if neither is strictly smaller than the other, then they overlap at least partially
   .filter(
     ({ elfOneStrictlySmaller, elfTwoStrictlySmaller }) =>
       !(elfOneStrictlySmaller || elfTwoStrictlySmaller)
-  );
+  ).length;
 
 console.dir(
   {
-    cleanedData,
     processDataQ1,
     processDataQ2,
   },
