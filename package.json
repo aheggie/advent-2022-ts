@@ -9,6 +9,7 @@
   "author": "Alexandra Heggie",
   "license": "UNLICENSED",
   "devDependencies": {
+    "@types/node": "^18.11.12",
     "typescript": "^4.9.4"
   }
 }
