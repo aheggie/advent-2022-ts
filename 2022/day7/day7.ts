@@ -1,6 +1,6 @@
-import { Dir, readFileSync } from "fs";
+import { readFileSync } from "fs";
 
-const arg: string = process.argv[2];
+const arg = process.argv[2];
 
 if (arg !== "test" && arg !== "input") {
   throw new Error("argument must be 'test' or 'input'");
