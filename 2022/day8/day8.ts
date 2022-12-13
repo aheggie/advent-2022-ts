@@ -1,4 +1,4 @@
-import { Dir, readFileSync } from "fs";
+import { readFileSync } from "fs";
 
 const arg: string = process.argv[2];
 
